@@ -6,10 +6,11 @@ use App\Models\Traits\RelatesToTeams;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 
 class Thing extends Model
 {
-    use HasFactory, RelatesToTeams;
+    use HasFactory, RelatesToTeams, HasRecursiveRelationships;
 
     protected $fillable = [
         'parent_id'
@@ -27,8 +28,5 @@ class Thing extends Model
         return $this->morphTo();
     }
 
-    public function children()
-    {
-        return $this->hasMany(Thing::class, 'parent_id', 'id');
-    }
+
 }

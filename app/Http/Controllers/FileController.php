@@ -14,13 +14,14 @@ class FileController extends Controller
     }
 
     public function index(Request $request) {
-        $thing = Thing::forCurrentTeam()->where(
+        $thing = Thing::with('children.thingable', 'ancestorsAndSelf.thingable')->forCurrentTeam()->where(
             'uuid', $request->get('uuid', Thing::forCurrentTeam()->whereNull('parent_id')->first()->uuid)
         )
             ->firstOrFail();
 
         return view('files', [
-            'thing' => $thing
+            'thing' => $thing,
+            'ancestors' => $thing->ancestorsAndSelf()->breadthFirst()->get()
         ]);
     }
 }
