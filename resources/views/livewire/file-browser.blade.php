@@ -10,7 +10,7 @@
                 <button class="bg-gray-200 px-6 h-12 rounded-lg mr-2" wire:click="$set('creatingNewFolder', true)">
                     {{ __('New folder') }}
                 </button>
-                <button class="bg-blue-500 text-white font-bold px-6 h-12 rounded-lg mr-2">
+                <button class="bg-blue-500 text-white font-bold px-6 h-12 rounded-lg mr-2" wire:click="$set('showingFileUploadForm', true)">
                     {{ __('Upload files') }}
                 </button>
             </div>
@@ -94,17 +94,37 @@
                                 </svg>
                             @endif
 
-                            @if ($child->thingable_type === 'folder')
-                                <a href="{{ route('files', ['uuid' => $child->uuid]) }}"
-                                   class="p-2 font-bold text-blue-600 flex-grow">
-                                    {{ $child->thingable->name }}
-                                </a>
-                            @endif
+                            @if ($renamingThing === $child->id)
 
-                            @if ($child->thingable_type === 'file')
-                                <a href="" class="p-2 font-bold text-blue-600 flex-grow">
-                                    {{ $child->thingable->name }}
-                                </a>
+                                    <form class="flex items-center ml-2 flex-grow" wire:submit.prevent="renameThing">
+                                        <input type="text" name="" id=""
+                                               class="w-full px-3 h-10 border-2 border-gray-200 rounded-lg mr-2"
+                                               wire:model.defer="renamingThingState.name"
+                                        />
+                                        <button type="submit" class="bg-blue-600 text-white px-6 h-10 rounded-lg mr-2">
+                                            {{ __('Rename') }}
+                                        </button>
+                                        <button wire:click="$set('renamingThing', null)"
+                                                class="bg-gray-200 px-6 h-10 rounded-lg mr-2">
+                                            {{ __('Cancel') }}
+                                        </button>
+                                    </form>
+
+                            @else
+
+                                @if ($child->thingable_type === 'folder')
+                                    <a href="{{ route('files', ['uuid' => $child->uuid]) }}"
+                                       class="p-2 font-bold text-blue-600 flex-grow">
+                                        {{ $child->thingable->name }}
+                                    </a>
+                                @endif
+
+                                @if ($child->thingable_type === 'file')
+                                    <a href="" class="p-2 font-bold text-blue-600 flex-grow">
+                                        {{ $child->thingable->name }}
+                                    </a>
+                                @endif
+
                             @endif
 
                         </td>
@@ -122,7 +142,7 @@
                             <div class="flex justify-end items-center">
                                 <ul class="flex items-center">
                                     <li class="mr-4">
-                                        <button class="text-gray-400 font-bold">
+                                        <button class="text-gray-400 font-bold" wire:click="$set('renamingThing', {{ $child->id }})">
                                             {{ __('Rename') }}
                                         </button>
                                     </li>
@@ -146,6 +166,22 @@
                 {{ __('This folder is empty') }}
             </div>
         @endif
+
+        <x-jet-modal wire:model="showingFileUploadForm">
+            <div wire:ignore
+                 class="m-3 border-dashed border-2"
+                 x-data="{
+                 initFilepond () {
+                        const pond = FilePond.create(this.$refs.filepond)
+                    }
+                 }"
+                 x-init="initFilepond"
+            >
+                <div>
+                    <input type="file" x-ref="filepond" multiple>
+                </div>
+            </div>
+        </x-jet-modal>
 
     </div>
 </div>

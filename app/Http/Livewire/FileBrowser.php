@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Thing;
 use Livewire\Component;
 
 class FileBrowser extends Component
@@ -16,6 +17,41 @@ class FileBrowser extends Component
     public $newFolderState = [
         'name' => ''
     ];
+
+    public $renamingThing;
+
+    public $renamingThingState;
+
+    public $showingFileUploadForm = false;
+
+    public function renameThing() {
+        $this->validate([
+            'renamingThingState.name' => 'required|max:255'
+        ]);
+
+        Thing::forCurrentTeam()
+            ->find($this->renamingThing)
+            ->thingable
+            ->update($this->renamingThingState);
+
+        $this->thing = $this->thing->fresh();
+        $this->renamingThing = null;
+
+    }
+
+    public function updatingRenamingThing($id)
+    {
+        if ($id === null) {
+            return;
+        }
+
+        if ($thing = Thing::forCurrentTeam()->find($id)) {
+            $this->renamingThingState = [
+                'name' => $thing->thingable->name
+            ];
+        }
+
+    }
 
     public function createFolder()
     {
