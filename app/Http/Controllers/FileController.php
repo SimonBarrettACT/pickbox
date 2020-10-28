@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use App\Models\Thing;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
@@ -23,5 +25,11 @@ class FileController extends Controller
             'thing' => $thing,
             'ancestors' => $thing->ancestorsAndSelf()->breadthFirst()->get()
         ]);
+    }
+
+    public function download(File $file)
+    {
+        $this->authorize('download', $file);
+        return Storage::disk('local')->download($file->path, $file->name);
     }
 }

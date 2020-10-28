@@ -3,7 +3,7 @@
         <div class="flex-grow md:mr-3 mt-4 md:mt-0 w-full md:w-auto order-3 md:order-1">
             <!--suppress HtmlFormInputWithoutLabel -->
             <input type="search" placeholder="Search files and folders"
-                   class="w-full px-3 h-12 border-2 rounded-lg">
+                   class="w-full px-3 h-12 border-2 rounded-lg" wire:model="query">
         </div>
         <div class="order-2">
             <div>
@@ -22,18 +22,25 @@
         <div class="py-2 px-3">
 
             <div class="flex items-center">
-                @foreach ($ancestors as $ancestor)
-                    <a href="{{ route('files', ['uuid' => $ancestor->uuid]) }}"
-                       class="font-bold text-gray-400">{{ $ancestor->thingable->name }}</a>
-                    @if (!$loop->last)
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                             class="text-gray-300 w-5 h-5 mx-1">
-                            <path fill-rule="evenodd"
-                                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                    @endif
-                @endforeach
+                @if ($this->query)
+                   <div class="font-bold text=gray-400">
+                       Found {{ $this->results->count() }} {{ Str::plural('result', $this->results->count()) }}.
+                       <button class="text-blue-700 font-bold" wire:click="$set('query', null)">{{ __('Clear search') }}</button>
+                   </div>
+                @else
+                    @foreach ($ancestors as $ancestor)
+                        <a href="{{ route('files', ['uuid' => $ancestor->uuid]) }}"
+                           class="font-bold text-gray-400">{{ $ancestor->thingable->name }}</a>
+                        @if (!$loop->last)
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                 class="text-gray-300 w-5 h-5 mx-1">
+                                <path fill-rule="evenodd"
+                                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                        @endif
+                    @endforeach
+                @endif
 
             </div>
 
@@ -75,7 +82,7 @@
                     </tr>
                 @endif
 
-                @foreach ($thing->children as $child)
+                @foreach ($this->results as $child)
                     <tr class="border-gray100 @if (!$loop->last)border-b @endif hover:bg-gray-100">
                         <td class="py-2 px-3 flex items-center">
                             @if ($child->thingable_type === 'file')
@@ -120,7 +127,7 @@
                                 @endif
 
                                 @if ($child->thingable_type === 'file')
-                                    <a href="" class="p-2 font-bold text-blue-600 flex-grow">
+                                    <a href="{{ route('files.download', $child->thingable) }}" class="p-2 font-bold text-blue-600 flex-grow">
                                         {{ $child->thingable->name }}
                                     </a>
                                 @endif
@@ -130,7 +137,7 @@
                         </td>
                         <td class="py-2 px-3">
                             @if ($child->thingable_type === 'file')
-                            {{ $child->thingable->size }}
+                            {{ $child->thingable->sizeForHumans() }}
                             @else
                             &mdash;
                             @endif
@@ -147,7 +154,7 @@
                                         </button>
                                     </li>
                                     <li>
-                                        <button class="text-red-400 font-bold">
+                                        <button class="text-red-400 font-bold" wire:click="$set('confirmingThingDeletion', {{ $child->id }})">
                                             {{ __('Delete') }}
                                         </button>
                                     </li>
@@ -161,18 +168,55 @@
             </table>
         </div>
 
-        @if ($thing->children->count() === 0)
+        @if ($this->results->count() === 0)
             <div class="p-3 text-grey-700">
                 {{ __('This folder is empty') }}
             </div>
         @endif
 
+
+        <x-jet-dialog-modal wire:model="confirmingThingDeletion">
+
+            <x-slot name="title">
+                {{ __('Delete') }}
+            </x-slot>
+
+            <x-slot name="content">
+                {{ __('Are you sure you want to delete this?') }}
+            </x-slot>
+
+            <x-slot name="footer">
+                <x-jet-secondary-button wire:click="$set('confimingThingDeletion', null)" wire:loading.attr="disabled">
+                    {{ __('Nevermind') }}
+                </x-jet-secondary-button>
+
+                <x-jet-danger-button class="ml-2" wire:click="deleteThing">
+                    {{ __('Delete') }}
+                </x-jet-danger-button>
+            </x-slot>
+
+        </x-jet-dialog-modal>
+
         <x-jet-modal wire:model="showingFileUploadForm">
             <div wire:ignore
-                 class="m-3 border-dashed border-2"
+                 class="m-3"
                  x-data="{
                  initFilepond () {
-                        const pond = FilePond.create(this.$refs.filepond)
+                        const pond = FilePond.create(this.$refs.filepond, {
+                            onprocessfile: (error, file) => {
+                                pond.removeFile(file.id)
+
+                                if (pond.getFiles().length === 0) {
+                                    @this.set('showingFileUploadForm', false)
+                                }
+                            },
+                            allowRevert: false,
+                            server: {
+                                process: (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
+                                    @this.upload('upload', file, load, error, progress)
+                                }
+                            }
+                        })
                     }
                  }"
                  x-init="initFilepond"
