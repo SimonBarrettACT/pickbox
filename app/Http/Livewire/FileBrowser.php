@@ -71,17 +71,20 @@ class FileBrowser extends Component
 
     }
     public function renameThing() {
-        $this->validate([
-            'renamingThingState.name' => 'required|max:255'
-        ]);
 
-        Thing::forCurrentTeam()
-            ->find($this->renamingThing)
-            ->thingable
-            ->update($this->renamingThingState);
+        if ($this->renamingThing) {
+            $this->validate([
+                'renamingThingState.name' => 'required|max:255'
+            ]);
 
-        $this->thing = $this->thing->fresh();
-        $this->renamingThing = null;
+            Thing::forCurrentTeam()
+                ->find($this->renamingThing)
+                ->thingable
+                ->update($this->renamingThingState);
+
+            $this->thing = $this->thing->fresh();
+            $this->renamingThing = null;
+        }
 
     }
 

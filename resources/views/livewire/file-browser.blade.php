@@ -3,14 +3,15 @@
         <div class="flex-grow md:mr-3 mt-4 md:mt-0 w-full md:w-auto order-3 md:order-1">
             <!--suppress HtmlFormInputWithoutLabel -->
             <input type="search" placeholder="Search files and folders"
-                   class="w-full px-3 h-12 border-2 rounded-lg" wire:model="query">
+                   class="form-input rounded-md shadow-sm w-full px-3 h-12 border-2 rounded-lg"
+                   wire:model="query">
         </div>
         <div class="order-2">
             <div>
-                <button class="bg-gray-200 px-6 h-12 rounded-lg mr-2" wire:click="$set('creatingNewFolder', true)">
+                <button class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue bg-gray-200 px-6 h-12 rounded-lg mr-2" wire:click="$set('creatingNewFolder', true)">
                     {{ __('New folder') }}
                 </button>
-                <button class="bg-blue-500 text-white font-bold px-6 h-12 rounded-lg mr-2" wire:click="$set('showingFileUploadForm', true)">
+                <button class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue bg-blue-500 text-white font-bold px-6 h-12 rounded-lg mr-2" wire:click="$set('showingFileUploadForm', true)">
                     {{ __('Upload files') }}
                 </button>
             </div>
@@ -25,7 +26,7 @@
                 @if ($this->query)
                    <div class="font-bold text=gray-400">
                        Found {{ $this->results->count() }} {{ Str::plural('result', $this->results->count()) }}.
-                       <button class="text-blue-700 font-bold" wire:click="$set('query', null)">{{ __('Clear search') }}</button>
+                       <button class="focus:outline-none text-blue-700 font-bold" wire:click="$set('query', null)">{{ __('Clear search') }}</button>
                    </div>
                 @else
                     @foreach ($ancestors as $ancestor)
@@ -64,14 +65,14 @@
                         <td class="p-3">
                             <form class="flex items-center" wire:submit.prevent="createFolder">
                                 <input type="text" name="" id=""
-                                       class="w-full px-3 h-10 border-2 border-gray-200 rounded-lg mr-2"
+                                       class="w-full px-3 h-10 border-2 border-gray-200 rounded-lg mr-2 focus:outline-none focus:shadow-outline focus:border-blue-300"
                                        wire:model.defer="newFolderState.name"
                                 />
-                                <button type="submit" class="bg-blue-600 text-white px-6 h-10 rounded-lg mr-2">
+                                <button type="submit" class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue bg-blue-600 text-white px-6 h-10 rounded-lg mr-2">
                                     {{ __('Create') }}
                                 </button>
                                 <button wire:click="$set('creatingNewFolder', false)"
-                                        class="bg-gray-200 px-6 h-10 rounded-lg mr-2">
+                                        class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue bg-gray-200 px-6 h-10 rounded-lg mr-2">
                                     {{ __('Cancel') }}
                                 </button>
                             </form>
@@ -105,14 +106,14 @@
 
                                     <form class="flex items-center ml-2 flex-grow" wire:submit.prevent="renameThing">
                                         <input type="text" name="" id=""
-                                               class="w-full px-3 h-10 border-2 border-gray-200 rounded-lg mr-2"
+                                               class="w-full px-3 h-10 border-2 border-gray-200 rounded-lg mr-2 focus:outline-none focus:shadow-outline focus:border-blue-300"
                                                wire:model.defer="renamingThingState.name"
                                         />
-                                        <button type="submit" class="bg-blue-600 text-white px-6 h-10 rounded-lg mr-2">
+                                        <button type="submit" class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue bg-blue-600 text-white px-6 h-10 rounded-lg mr-2">
                                             {{ __('Rename') }}
                                         </button>
                                         <button wire:click="$set('renamingThing', null)"
-                                                class="bg-gray-200 px-6 h-10 rounded-lg mr-2">
+                                                class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue bg-gray-200 px-6 h-10 rounded-lg mr-2">
                                             {{ __('Cancel') }}
                                         </button>
                                     </form>
@@ -149,12 +150,12 @@
                             <div class="flex justify-end items-center">
                                 <ul class="flex items-center">
                                     <li class="mr-4">
-                                        <button class="text-gray-400 font-bold" wire:click="$set('renamingThing', {{ $child->id }})">
+                                        <button class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue text-gray-400 font-bold" wire:click="$set('renamingThing', {{ $child->id }})">
                                             {{ __('Rename') }}
                                         </button>
                                     </li>
                                     <li>
-                                        <button class="text-red-400 font-bold" wire:click="$set('confirmingThingDeletion', {{ $child->id }})">
+                                        <button class="focus:outline-none focus:border-blue-300 focus:shadow-outline-blue text-red-400 font-bold" wire:click="$set('confirmingThingDeletion', {{ $child->id }})">
                                             {{ __('Delete') }}
                                         </button>
                                     </li>
@@ -186,7 +187,7 @@
             </x-slot>
 
             <x-slot name="footer">
-                <x-jet-secondary-button wire:click="$set('confimingThingDeletion', null)" wire:loading.attr="disabled">
+                <x-jet-secondary-button wire:click="$set('confirmingThingDeletion', null)" wire:loading.attr="disabled">
                     {{ __('Nevermind') }}
                 </x-jet-secondary-button>
 
